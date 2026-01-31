@@ -94,7 +94,7 @@ export class Game {
       equippedAbilityIds: { Q: null, W: null, E: null, R: null },
       recentEvents: [],
       player: {
-        name: 'Rage Warrior',
+        name: 'Warrior',
         hp: PLAYER_BASE_STATS.maxHp,
         maxHp: PLAYER_BASE_STATS.maxHp,
         baseDamage: PLAYER_BASE_STATS.baseDamage,

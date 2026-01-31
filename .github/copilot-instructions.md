@@ -1,8 +1,8 @@
-# Rage Roguelike - AI Agent Instructions
+# unnamed-roguelike - AI Agent Instructions
 
 ## Project Overview
 
-A browser-based roguelike game built with **React + TypeScript + Vite + Bun**. Combat is rendered on HTML5 Canvas with a rage-based warrior mechanic. The architecture emphasizes separation of concerns for maintainability and expandability.
+A browser-based roguelike game built with **React + TypeScript + Vite + Bun**. Combat is rendered on HTML5 Canvas with a `rage` spec mechanic (one of several planned specs). The architecture emphasizes separation of concerns for maintainability and expandability.
 
 ## Tech Stack
 

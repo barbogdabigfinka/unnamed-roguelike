@@ -19,7 +19,7 @@ If you are developing a production application, we recommend updating the config
 export default defineConfig([
   globalIgnores(['dist']),
   {
-    # Rage Roguelike
+    # unnamed-roguelike
 
     Browser-based roguelike built with React + TypeScript + Vite + Bun.
 
