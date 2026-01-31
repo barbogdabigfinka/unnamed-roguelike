@@ -1,9 +1,19 @@
-import { abilitiesById, enemiesById, enemyList, talentTreeDefinition } from './data'
-import { BLOCK, LEVEL_TARGETS, MAX_LEVEL, PLAYER_BASE_STATS } from './core/config'
+import { abilitiesById, enemiesById, talentTreeDefinition } from './data'
+import {
+  BLOCK,
+  ENCOUNTER_PACKS,
+  ENCOUNTER_SCALING,
+  GROUP_SCALING,
+  ENEMY_POWER_SCALING,
+  LEVEL_TARGETS,
+  MAX_LEVEL,
+  PLAYER_BASE_STATS,
+} from './core/config'
 import {
   dealDamageToEnemy as applyDamageToEnemy,
   performEnemyAttack as performEnemyAttackAction,
   performPlayerAttack as performPlayerAttackAction,
+  tickEnemyIntent as tickEnemyIntentForEnemy,
   tryEnemyAbilities as runEnemyAbilities,
 } from './combat/CombatManager'
 import type {
@@ -51,6 +61,8 @@ export class Game {
       ...enemy,
       buffs: enemy.buffs.map((b) => ({ ...b })),
       abilityCooldowns: { ...enemy.abilityCooldowns },
+      intent: enemy.intent ? { ...enemy.intent } : null,
+      attackTimerPaused: enemy.attackTimerPaused,
     }))
 
     return {
@@ -133,7 +145,7 @@ export class Game {
 
   public startNewRun() {
     this.state = this.createInitialState()
-    this.spawnNextEnemy(true)
+    this.spawnEncounter(true)
     this.emit()
   }
 
@@ -186,7 +198,10 @@ export class Game {
     for (const enemy of this.state.enemies) {
       if (!enemy.alive) continue
       this.reduceAbilityCooldowns(enemy.abilityCooldowns, deltaMs)
-      enemy.attackTimerMs = Math.max(0, enemy.attackTimerMs - deltaMs)
+      tickEnemyIntentForEnemy(this.state, enemy, deltaMs, (msg) => this.pushEvent(msg))
+      if (!enemy.attackTimerPaused) {
+        enemy.attackTimerMs = Math.max(0, enemy.attackTimerMs - deltaMs)
+      }
       enemy.hitFlashMs = Math.max(0, enemy.hitFlashMs - deltaMs)
       enemy.buffs = tickBuffs(enemy.buffs, deltaMs)
       if (enemy.attackTimerMs <= 0) {
@@ -232,7 +247,7 @@ export class Game {
   }
 
   private performEnemyAttack(enemy: EnemyState) {
-    performEnemyAttackAction(this.state, enemy)
+    performEnemyAttackAction(this.state, enemy, 1, (msg) => this.pushEvent(msg))
   }
 
   private tryEnemyAbilities(enemy: EnemyState) {
@@ -266,7 +281,7 @@ export class Game {
 
   public resumeAfterLevel() {
     if (this.state.phase === 'levelUp' || this.state.phase === 'victory') {
-      this.spawnNextEnemy(false)
+      this.spawnEncounter(false)
       this.state.phase = 'combat'
       this.emit()
     }
@@ -294,6 +309,14 @@ export class Game {
     const fullIdx = this.state.enemies.findIndex((e) => e.id === target.id)
     this.state.targetIndex = fullIdx >= 0 ? fullIdx : 0
     this.emit()
+  }
+
+  public selectTargetUp() {
+    this.moveTargetByRow(-1)
+  }
+
+  public selectTargetDown() {
+    this.moveTargetByRow(1)
   }
 
   public activateBlock() {
@@ -349,44 +372,119 @@ export class Game {
     return alive[0]
   }
 
-  private spawnNextEnemy(isTutorial: boolean) {
-    const definition = isTutorial
-      ? enemiesById.get('tutorialDummy')
-      : this.randomEnemy()
-    if (!definition) return
-    const enemy = this.instantiateEnemy(definition)
-    this.state.enemies = [enemy]
+  private spawnEncounter(isTutorial: boolean) {
+    const playerLevel = this.state.level
+
+    if (isTutorial) {
+      const definition = enemiesById.get('tutorialDummy')
+      if (!definition) return
+      const enemy = this.instantiateEnemy(definition, 1, 1)
+      this.state.enemies = [enemy]
+    } else {
+      const pack = this.state.fightCount === 1 ? this.firstRealFightPack() : this.pickEncounterPack(playerLevel)
+      const size = pack.length
+      const groupScaling = GROUP_SCALING[size as keyof typeof GROUP_SCALING] ?? { hp: 1, damage: 1 }
+      const powerScaling = this.getPowerScalingForLevel(playerLevel)
+      this.state.enemies = pack
+        .map((id) => enemiesById.get(id))
+        .filter((def): def is EnemyDefinition => Boolean(def))
+        .map((def) =>
+          this.instantiateEnemy(def, groupScaling.hp * powerScaling.hp, groupScaling.damage * powerScaling.damage),
+        )
+    }
     this.state.targetIndex = 0
     this.resetPlayerForCombat()
     this.state.phase = 'combat'
   }
 
-  private randomEnemy(): EnemyDefinition | undefined {
-    const pool = enemyList.filter((e) => e.id !== 'tutorialDummy')
-    return pool[Math.floor(Math.random() * pool.length)]
+  private pickEncounterPack(playerLevel: number): string[] {
+    const tierEntry = ENCOUNTER_SCALING.find((t) => playerLevel <= t.maxFight) ?? ENCOUNTER_SCALING[0]
+    const tiers = tierEntry.tiers
+    // Bias toward larger groups as fights increase within the tier band
+    const weightsByTier: Record<string, number> = {
+      solo: playerLevel <= 2 ? 0.7 : 0.35,
+      duo: playerLevel <= 3 ? 0.7 : 0.85,
+      trio: playerLevel <= 6 ? 0.55 : 0.85,
+      quint: playerLevel <= 8 ? 0.25 : 0.7,
+    }
+    const filteredWeights = tiers.map((t) => weightsByTier[t] ?? 1)
+    const total = filteredWeights.reduce((a, b) => a + b, 0) || 1
+    let roll = Math.random() * total
+    let chosen: keyof typeof ENCOUNTER_PACKS = tiers[0] as keyof typeof ENCOUNTER_PACKS
+    tiers.forEach((tier, idx) => {
+      if (roll > 0) {
+        roll -= filteredWeights[idx]
+        if (roll <= 0) chosen = tier as keyof typeof ENCOUNTER_PACKS
+      }
+    })
+    const packs = ENCOUNTER_PACKS[chosen]
+    return packs[Math.floor(Math.random() * packs.length)] ?? ['brute']
   }
 
-  private instantiateEnemy(def: EnemyDefinition) {
+  private moveTargetByRow(deltaRow: number) {
+    const aliveEntries = this.state.enemies
+      .map((enemy, idx) => ({ enemy, idx }))
+      .filter((entry) => entry.enemy.alive)
+    if (!aliveEntries.length) return
+    const aliveIdx = aliveEntries.findIndex((entry) => entry.idx === this.state.targetIndex)
+    const currentAliveIdx = aliveIdx >= 0 ? aliveIdx : 0
+    const targetRows = 3
+    const cols = Math.ceil(aliveEntries.length / targetRows) || 1
+    const totalRows = Math.ceil(aliveEntries.length / cols)
+    const row = Math.floor(currentAliveIdx / cols)
+    const col = currentAliveIdx % cols
+    const nextRow = Math.max(0, Math.min(totalRows - 1, row + deltaRow))
+    let candidateAliveIdx = nextRow * cols + col
+    if (candidateAliveIdx >= aliveEntries.length) {
+      candidateAliveIdx = aliveEntries.length - 1
+    }
+    const target = aliveEntries[candidateAliveIdx]
+    this.state.targetIndex = target?.idx ?? this.state.targetIndex
+    this.emit()
+  }
+
+  private firstRealFightPack(): string[] {
+    return ['brute']
+  }
+
+  private instantiateEnemy(def: EnemyDefinition, hpScale: number, damageScale: number) {
     const cooldowns: Record<string, number> = {}
-    def.abilities.forEach((a) => (cooldowns[a.id] = 0))
-    const interval = this.rollBetween(def.attackSpeedMinMs, def.attackSpeedMaxMs)
+    def.abilities.forEach((a) => {
+      // Stagger first casts so identical enemies don't sync their abilities
+      const initial = a.cooldownMs * (0.2 + Math.random() * 0.6)
+      cooldowns[a.id] = Math.round(initial)
+    })
+
+    // Small per-enemy speed jitter to desync attack timing without spawning with pre-charged bars
+    const speedJitter = 0.92 + Math.random() * 0.16 // ~ -8% to +8%
+    const minSpeed = def.attackSpeedMinMs * speedJitter
+    const maxSpeed = def.attackSpeedMaxMs * speedJitter
+    const interval = this.rollBetween(minSpeed, maxSpeed)
+    const uniqueId = `${def.id}-${Math.random().toString(36).slice(2, 8)}`
     return {
-      id: def.id,
+      id: uniqueId,
       name: def.name,
-      hp: def.maxHp,
-      maxHp: def.maxHp,
-      baseDamage: def.baseDamage,
+      hp: Math.round(def.maxHp * hpScale),
+      maxHp: Math.round(def.maxHp * hpScale),
+      baseDamage: def.baseDamage * damageScale,
       attackTimerMs: interval,
       attackIntervalMs: interval,
-      attackSpeedMinMs: def.attackSpeedMinMs,
-      attackSpeedMaxMs: def.attackSpeedMaxMs,
+      attackSpeedMinMs: minSpeed,
+      attackSpeedMaxMs: maxSpeed,
+      attackTimerPaused: false,
       slowMultiplier: 1,
       buffs: [],
       hitFlashMs: 0,
       abilities: def.abilities,
       abilityCooldowns: cooldowns,
+      intent: null,
       alive: true,
     }
+  }
+
+  private getPowerScalingForLevel(playerLevel: number) {
+    const tier = ENEMY_POWER_SCALING.find((t) => playerLevel <= t.maxFight) ?? ENEMY_POWER_SCALING[ENEMY_POWER_SCALING.length - 1]
+    return { hp: tier.hp, damage: tier.damage }
   }
 
   private rollBetween(min: number, max: number) {
