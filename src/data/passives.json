@@ -1,0 +1,26 @@
+[
+  {
+    "id": "swiftStrikes",
+    "name": "Swift Strikes",
+    "description": "+10% attack speed",
+    "statModifiers": { "attackSpeedMultiplier": 1.1 }
+  },
+  {
+    "id": "heavyHands",
+    "name": "Heavy Hands",
+    "description": "+5 flat damage",
+    "statModifiers": { "flatDamage": 5 }
+  },
+  {
+    "id": "toughness",
+    "name": "Toughness",
+    "description": "+15% max HP",
+    "statModifiers": { "maxHp": 1.15 }
+  },
+  {
+    "id": "steadfast",
+    "name": "Steadfast",
+    "description": "+5% damage reduction",
+    "statModifiers": { "damageReduction": 0.05 }
+  }
+]

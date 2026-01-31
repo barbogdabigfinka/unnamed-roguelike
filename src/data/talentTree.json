@@ -1,0 +1,70 @@
+{
+  "rowUnlockRequirements": {
+    "2": 1,
+    "3": 3
+  },
+  "rows": [
+    [
+      {
+        "id": "rageStrikeNode",
+        "row": 1,
+        "type": "ability",
+        "abilityId": "rageStrike",
+        "label": "Rage Strike",
+        "prerequisiteIds": []
+      }
+    ],
+    [
+      {
+        "id": "battleFuryNode",
+        "row": 2,
+        "type": "ability",
+        "abilityId": "battleFury",
+        "label": "Battle Fury",
+        "prerequisiteIds": ["rageStrikeNode"]
+      },
+      {
+        "id": "cripplingBlowNode",
+        "row": 2,
+        "type": "ability",
+        "abilityId": "cripplingBlow",
+        "label": "Crippling Blow",
+        "prerequisiteIds": ["rageStrikeNode"]
+      },
+      {
+        "id": "swiftStrikesNode",
+        "row": 2,
+        "type": "passive",
+        "passiveId": "swiftStrikes",
+        "label": "Swift Strikes",
+        "prerequisiteIds": ["rageStrikeNode"]
+      }
+    ],
+    [
+      {
+        "id": "rageUnleashNode",
+        "row": 3,
+        "type": "ability",
+        "abilityId": "rageUnleash",
+        "label": "Rage Unleash",
+        "prerequisiteIds": ["battleFuryNode", "cripplingBlowNode"]
+      },
+      {
+        "id": "heavyHandsNode",
+        "row": 3,
+        "type": "passive",
+        "passiveId": "heavyHands",
+        "label": "Heavy Hands",
+        "prerequisiteIds": ["battleFuryNode"]
+      },
+      {
+        "id": "toughnessNode",
+        "row": 3,
+        "type": "passive",
+        "passiveId": "toughness",
+        "label": "Toughness",
+        "prerequisiteIds": ["cripplingBlowNode"]
+      }
+    ]
+  ]
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "rageStrike",
+    "name": "Rage Strike",
+    "slot": "Q",
+    "cooldownMs": 4000,
+    "effect": "generator",
+    "values": {
+      "rageGain": 1,
+      "damageBonus": 0
+    },
+    "description": "Instant attack that grants 1 Rage and resets the swing timer."
+  },
+  {
+    "id": "battleFury",
+    "name": "Battle Fury",
+    "slot": "W",
+    "cooldownMs": 10000,
+    "effect": "attackSpeedBuff",
+    "values": {
+      "attackSpeedBonus": 0.3,
+      "durationMs": 4000
+    },
+    "description": "Boost attack speed for a short duration."
+  },
+  {
+    "id": "cripplingBlow",
+    "name": "Crippling Blow",
+    "slot": "E",
+    "cooldownMs": 8000,
+    "effect": "empowerNextAttack",
+    "values": {
+      "slowPercent": 0.25,
+      "slowDurationMs": 3000
+    },
+    "description": "Empower the next attack to slow enemy attack speed."
+  },
+  {
+    "id": "rageUnleash",
+    "name": "Rage Unleash",
+    "slot": "R",
+    "cooldownMs": 12000,
+    "effect": "consumeRage",
+    "values": {
+      "consumeBaseDamage": 5,
+      "consumePerRage": 8
+    },
+    "description": "Consume all Rage to deal heavy instant damage."
+  }
+]
