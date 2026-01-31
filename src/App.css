@@ -1,8 +1,10 @@
 .app-shell {
-  max-width: 1100px;
+  max-width: 1700px;
+  width: 92vw;
   margin: 0 auto;
-  padding: 32px 20px 48px;
+  padding: 18px;
   color: #e2e8f0;
+  box-sizing: border-box;
 }
 
 .panel {
@@ -65,21 +67,34 @@
   background: rgba(15, 23, 42, 0.8);
   border: 1px solid #1f2937;
   border-radius: 16px;
-  padding: 16px;
+  padding: 22px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  min-height: 82vh;
 }
 
 .combat-shell {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 12px;
-  align-items: start;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .combat-main {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1 1 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.combat-spacer {
+  min-width: 240px;
+  flex: 0 0 260px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  pointer-events: none;
 }
 
 .combat-sidebar {
@@ -87,8 +102,10 @@
   border-radius: 12px;
   background: #0f172a;
   padding: 12px;
-  max-height: 520px;
+  max-height: 70vh;
   overflow: auto;
+  min-width: 240px;
+  flex: 0 0 260px;
 }
 
 .combat-sidebar h4 {
@@ -114,6 +131,7 @@
 
 .canvas-wrap {
   position: relative;
+  min-height: 0;
 }
 
 .buff-overlay {
@@ -142,9 +160,11 @@
 
 .canvas {
   width: 100%;
+  height: 100%;
   border: 1px solid #1f2937;
   border-radius: 12px;
   background: #0b1224;
+  display: block;
 }
 
 .overlay-card {

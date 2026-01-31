@@ -28,9 +28,17 @@ export function CombatScreen({ game, state, onLevelUp }: CombatScreenProps) {
         e.preventDefault()
         game.activateBlock()
       } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
         game.selectNextTarget()
       } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
         game.selectPrevTarget()
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        game.selectTargetUp()
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        game.selectTargetDown()
       } else if (['q', 'w', 'e', 'r'].includes(e.key.toLowerCase())) {
         const slot = e.key.toUpperCase() as 'Q' | 'W' | 'E' | 'R'
         game.activateAbility(slot)
@@ -46,6 +54,8 @@ export function CombatScreen({ game, state, onLevelUp }: CombatScreenProps) {
 
   return (
     <div className="combat-shell">
+      <aside className="combat-spacer" aria-hidden="true" />
+
       <div className="combat-main">
         <div className="hud">
           <div className="stat-block">
@@ -69,7 +79,7 @@ export function CombatScreen({ game, state, onLevelUp }: CombatScreenProps) {
         </div>
 
         <div className="canvas-wrap">
-          <canvas ref={canvasRef} width={780} height={460} className="canvas" />
+          <canvas ref={canvasRef} width={1500} height={850} className="canvas" />
           <BuffOverlay buffs={state.player.buffs} />
         </div>
 
@@ -90,7 +100,7 @@ export function CombatScreen({ game, state, onLevelUp }: CombatScreenProps) {
                 />
               )
             })}
-          <AbilitySlot label="Space" cooldown={state.player.blockCooldownMs} total={5000} description="Block" />
+          <AbilitySlot label="Space" cooldown={state.player.blockCooldownMs} total={4000} description="Block" />
         </div>
         <p className="muted">Controls: Arrow keys to swap targets, Space to Block, Q/W/E/R for abilities.</p>
       </div>

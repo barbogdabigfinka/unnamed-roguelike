@@ -11,8 +11,8 @@
   {
     "id": "brute",
     "name": "Brute",
-    "maxHp": 60,
-    "baseDamage": 8,
+    "maxHp": 80,
+    "baseDamage": 9,
     "attackSpeedMinMs": 3600,
     "attackSpeedMaxMs": 4200,
     "abilities": [
@@ -22,8 +22,18 @@
         "cooldownMs": 12000,
         "effect": "damageBuff",
         "values": {
-          "damageMultiplier": 1.2,
-          "durationMs": 4000
+          "damageMultiplier": 1.25,
+          "durationMs": 4500
+        }
+      },
+      {
+        "id": "bruteCrushWindup",
+        "name": "Crushing Blow",
+        "cooldownMs": 14000,
+        "castTimeMs": 1400,
+        "effect": "instantAttack",
+        "values": {
+          "damageMultiplier": 2.1
         }
       }
     ]
@@ -31,10 +41,10 @@
   {
     "id": "skirmisher",
     "name": "Skirmisher",
-    "maxHp": 40,
-    "baseDamage": 5,
-    "attackSpeedMinMs": 2600,
-    "attackSpeedMaxMs": 3200,
+    "maxHp": 55,
+    "baseDamage": 6,
+    "attackSpeedMinMs": 2400,
+    "attackSpeedMaxMs": 3000,
     "abilities": [
       {
         "id": "quickJab",
@@ -48,8 +58,8 @@
   {
     "id": "shaman",
     "name": "Shaman",
-    "maxHp": 50,
-    "baseDamage": 6,
+    "maxHp": 60,
+    "baseDamage": 5,
     "attackSpeedMinMs": 3200,
     "attackSpeedMaxMs": 3800,
     "abilities": [
@@ -57,9 +67,10 @@
         "id": "smallHeal",
         "name": "Heal",
         "cooldownMs": 15000,
+        "castTimeMs": 1000,
         "effect": "heal",
         "values": {
-          "healAmount": 10
+          "healAmount": 12
         }
       }
     ]

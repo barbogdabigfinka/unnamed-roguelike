@@ -38,7 +38,8 @@ export interface EnemyAbilityDefinition {
   id: string
   name: string
   cooldownMs: number
-  effect: 'damageBuff' | 'instantAttack' | 'heal'
+  castTimeMs?: number
+  effect: 'damageBuff' | 'instantAttack' | 'heal' | 'attackModifier'
   values: {
     damageMultiplier?: number
     attackSpeedBonus?: number
@@ -55,6 +56,15 @@ export interface EnemyDefinition {
   attackSpeedMinMs: number
   attackSpeedMaxMs: number
   abilities: EnemyAbilityDefinition[]
+}
+
+export interface EnemyIntent {
+  abilityId: string
+  abilityName: string
+  effect: EnemyAbilityDefinition['effect']
+  phase: 'intent' | 'channeling'
+  remainingMs: number
+  totalMs: number
 }
 
 export interface TalentNodeDefinition {
@@ -124,11 +134,13 @@ export interface EnemyState {
   attackIntervalMs: number
   attackSpeedMinMs: number
   attackSpeedMaxMs: number
+  attackTimerPaused: boolean
   slowMultiplier: number
   buffs: BuffInstance[]
   hitFlashMs: number
   abilities: EnemyAbilityDefinition[]
   abilityCooldowns: Record<string, number>
+  intent: EnemyIntent | null
   alive: boolean
 }
 
@@ -164,6 +176,8 @@ export interface GameController {
   activateAbility(slot: AbilitySlot): void
   selectNextTarget(): void
   selectPrevTarget(): void
+  selectTargetUp(): void
+  selectTargetDown(): void
   applyTalent(nodeId: string): void
 }
 
