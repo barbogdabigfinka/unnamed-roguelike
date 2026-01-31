@@ -30,8 +30,8 @@ export class Renderer {
   }
 
   private drawPlayer(state: GameState, width: number, height: number) {
-    const playerX = width * 0.2
-    const playerY = height * 0.6
+    const playerX = width * 0.25
+    const playerY = height * 0.55
     const flash = state.player.hitFlashMs > 0
     this.ctx.fillStyle = flash ? '#f8fafc' : '#38bdf8'
     this.ctx.fillRect(playerX - 30, playerY - 30, 60, 60)
@@ -49,20 +49,28 @@ export class Renderer {
       this.ctx.arc(playerX, playerY, 46, 0, Math.PI * 2)
       this.ctx.stroke()
     }
-    this.drawHealthBar(playerX - 40, playerY - 50, 80, 8, state.player.hp, state.player.maxHp, '#38bdf8')
-    this.drawRagePips(playerX - 40, playerY + 40, state.player.rage, state.player.rageCap)
+    this.drawHealthBar(playerX - 40, playerY - 64, 80, 8, state.player.hp, state.player.maxHp, '#38bdf8')
+    this.drawRagePips(playerX, playerY + 52, state.player.rage, state.player.rageCap)
   }
 
   private drawEnemies(state: GameState, width: number, height: number) {
     const alive = state.enemies.filter((e) => e.alive)
     if (!alive.length) return
-    const spacing = width * 0.28
-    const baseX = width * 0.6
-    const centerY = height * 0.42
+    const centerX = width * 0.75
+    const centerY = height * 0.55
+    const maxPerRow = 3
+    const cols = Math.min(maxPerRow, alive.length)
+    const rows = Math.ceil(alive.length / maxPerRow)
+    const spacingX = width * 0.12
+    const spacingY = height * 0.12
 
     alive.forEach((enemy, idx) => {
-      const x = baseX + (idx / Math.max(alive.length - 1, 1)) * spacing
-      const y = centerY + (idx % 2 === 0 ? -20 : 20)
+      const row = Math.floor(idx / maxPerRow)
+      const col = idx % maxPerRow
+      const offsetX = (col - (cols - 1) / 2) * spacingX
+      const offsetY = (row - (rows - 1) / 2) * spacingY
+      const x = centerX + offsetX
+      const y = centerY + offsetY
       const isTarget = enemy.id === this.currentTargetId(state)
       const flash = enemy.hitFlashMs > 0
       this.ctx.fillStyle = flash ? '#fde68a' : isTarget ? '#f59e0b' : '#ef4444'
@@ -70,7 +78,7 @@ export class Renderer {
       this.ctx.arc(x, y, 28, 0, Math.PI * 2)
       this.ctx.fill()
       this.drawHealthBar(x - 30, y - 40, 60, 6, enemy.hp, enemy.maxHp, '#ef4444')
-      this.drawEnemyTimerBar(x - 30, y + 34, 60, 6, enemy)
+      this.drawEnemyTimerBar(x - 45, y + 42, 90, 10, enemy)
     })
   }
 
@@ -104,11 +112,14 @@ export class Renderer {
     this.drawBar(x, y, w, h, pct, color, '#0f172a')
   }
 
-  private drawRagePips(x: number, y: number, rage: number, cap: number) {
+  private drawRagePips(centerX: number, y: number, rage: number, cap: number) {
     const size = 10
+    const gap = 4
+    const totalWidth = cap * size + (cap - 1) * gap
+    const startX = centerX - totalWidth / 2
     for (let i = 0; i < cap; i += 1) {
       this.ctx.fillStyle = i < rage ? '#f97316' : '#1f2937'
-      this.ctx.fillRect(x + i * (size + 4), y, size, size)
+      this.ctx.fillRect(startX + i * (size + gap), y, size, size)
     }
   }
 
