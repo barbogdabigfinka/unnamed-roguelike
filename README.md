@@ -59,6 +59,14 @@ export default defineConfig([
 
     This repo includes a basic GitHub Actions workflow that runs a TypeScript build and Vite build on push and pull requests.
 
+    ## Deploy (GitHub Pages)
+
+    Deploy workflow: `.github/workflows/deploy.yml`
+
+    1) Ensure the repo has Pages permissions (default when you enable Actions).
+    2) Push to `main` (or `master`); the workflow builds `dist` and publishes to GitHub Pages.
+    3) Configure Pages in GitHub UI: Settings → Pages → Source: “GitHub Actions”.
+
     ## License
 
     MIT
