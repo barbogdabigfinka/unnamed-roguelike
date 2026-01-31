@@ -11,8 +11,8 @@
   {
     "id": "brute",
     "name": "Brute",
-    "maxHp": 80,
-    "baseDamage": 9,
+    "maxHp": 45,
+    "baseDamage": 5,
     "attackSpeedMinMs": 3600,
     "attackSpeedMaxMs": 4200,
     "abilities": [
@@ -41,7 +41,7 @@
   {
     "id": "skirmisher",
     "name": "Skirmisher",
-    "maxHp": 55,
+    "maxHp": 40,
     "baseDamage": 6,
     "attackSpeedMinMs": 2400,
     "attackSpeedMaxMs": 3000,
@@ -58,7 +58,7 @@
   {
     "id": "shaman",
     "name": "Shaman",
-    "maxHp": 60,
+    "maxHp": 30,
     "baseDamage": 5,
     "attackSpeedMinMs": 3200,
     "attackSpeedMaxMs": 3800,
