@@ -1,3 +1,5 @@
+import { abilitiesById, passivesById } from '@/game/data'
+import { Tooltip } from '@/ui/components/Tooltip'
 import type { TalentNodeDefinition, TalentTreeDefinition } from '@/game/types'
 
 interface TalentTreeProps {
@@ -14,16 +16,18 @@ export function TalentTree({ tree, unlocked, talentPoints, onSelect }: TalentTre
         <div key={idx} className="talent-row">
           {row.map((node) => {
             const state = getNodeState(node, unlocked, talentPoints, tree)
+            const tooltip = getTooltip(node)
             return (
-              <button
-                key={node.id}
-                className={`talent-node ${state}`}
-                onClick={() => state === 'available' && onSelect(node.id)}
-                disabled={state !== 'available'}
-              >
-                <div className="talent-label">{node.label}</div>
-                <div className="talent-type">{node.type === 'ability' ? 'Ability' : 'Passive'}</div>
-              </button>
+              <Tooltip key={node.id} label={tooltip}>
+                <button
+                  className={`talent-node ${state}`}
+                  onClick={() => state === 'available' && onSelect(node.id)}
+                  disabled={state !== 'available'}
+                >
+                  <div className="talent-label">{node.label}</div>
+                  <div className="talent-type">{node.type === 'ability' ? 'Ability' : 'Passive'}</div>
+                </button>
+              </Tooltip>
             )
           })}
         </div>
@@ -31,6 +35,24 @@ export function TalentTree({ tree, unlocked, talentPoints, onSelect }: TalentTre
       <p className="muted">Spend talent points to unlock abilities and passives. Row unlocks require points in prior rows.</p>
     </div>
   )
+}
+
+function getTooltip(node: TalentNodeDefinition): string {
+  if (node.type === 'ability' && node.abilityId) {
+    const def = abilitiesById.get(node.abilityId)
+    if (def) {
+      const desc = def.description ? `: ${def.description}` : ''
+      return `${def.name}${desc}`
+    }
+  }
+  if (node.type === 'passive' && node.passiveId) {
+    const def = passivesById.get(node.passiveId)
+    if (def) {
+      const desc = def.description ? `: ${def.description}` : ''
+      return `${def.name}${desc}`
+    }
+  }
+  return 'Talent details coming soon'
 }
 
 function getNodeState(

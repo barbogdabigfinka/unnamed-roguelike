@@ -9,9 +9,8 @@ export function CharacterSelect({ onSelect, onBack }: CharacterSelectProps) {
       <h2>Select Your Class</h2>
       <div className="card-row">
         <div className="card selectable" onClick={onSelect} role="button" tabIndex={0}>
-          <h3>Rage Warrior</h3>
-          <p className="muted">Rage-based fighter with rapid strikes.</p>
-          <p className="muted">Signature: Rage Strike (Q)</p>
+          <h3>Warrior</h3>
+          <p className="muted">Might makes right.</p>
         </div>
         <div className="card locked">
           <h3>Locked</h3>
